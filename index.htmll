@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Telegram Scam Report Helper</title>
+  <style>
+    body { font-family: Arial; background-color: #f2f2f2; text-align: center; padding: 30px; }
+    .container { background: white; border-radius: 10px; padding: 20px; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { color: #0088cc; }
+    button { background: #0088cc; color: white; border: none; padding: 10px 20px; margin: 10px; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0077b3; }
+    #result { margin-top: 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Telegram Scam Report Generator</h2>
+    <p>Select the type of report you want to create:</p>
+    <button onclick="generateReport('fake account')">Fake Account</button>
+    <button onclick="generateReport('fraud group')">Fraud Group</button>
+    <button onclick="generateReport('impersonation')">Impersonation</button>
+    <p id="result"></p>
+  </div>
+
+  <script>
+    function generateReport(type) {
+      let report = '';
+      if (type === 'fake account') {
+        report = '⚠️ Report: This account is pretending to be someone else. Please take action.';
+      } else if (type === 'fraud group') {
+        report = '🚨 Report: This Telegram group is spreading scam or misleading info.';
+      } else if (type === 'impersonation') {
+        report = '⚠️ Report: This user is impersonating a real person.';
+      }
+      document.getElementById('result').innerText = report;
+    }
+  </script>
+</body>
+</html>
