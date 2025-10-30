@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Amar Reports — Scam Report Generator</title>
+<style>
+  :root{
+    --bg:#0f1720;--panel:#111827;--muted:#9ca3af;--accent:#0ea5e9;
+    --card:#0b1220;--white:#ffffff;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071023 0%,#071723 100%);color:var(--white)}
+  .app{max-width:920px;margin:18px auto;padding:12px}
+  header{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#0b3a57,#153a5a);box-shadow:0 6px 18px rgba(2,6,23,.6)}
+  header .title{font-size:20px;font-weight:700}
+  .layout{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+  .sidebar{flex:0 0 320px;background:var(--panel);border-radius:10px;padding:12px;min-height:420px}
+  .content{flex:1;min-width:260px;background:linear-gradient(180deg,#071322,#0b1830);border-radius:10px;padding:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+  .list-item{padding:14px;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .list-item:hover{background:rgba(255,255,255,0.02)}
+  .report-box{background:#0a1220;padding:14px;border-radius:10px;margin-bottom:12px}
+  .report-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  button, .btn{background:var(--accent);color:#042127;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white)}
+  textarea{width:100%;min-height:120px;background:#071225;color:var(--white);border-radius:8px;border:1px solid rgba(255,255,255,0.03);padding:8px}
+  .muted{color:var(--muted);font-size:13px}
+  .ad-slot{margin-top:10px;padding:10px;background:linear-gradient(90deg,#0d2230,#08101b);border-radius:8px;text-align:center;color:var(--muted);border:1px dashed rgba(255,255,255,0.03)}
+  .footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+  .top-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+  .search{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#071225;color:var(--white)}
+  .small{font-size:13px;padding:6px 8px;border-radius:6px}
+  @media (max-width:800px){.layout{flex-direction:column}.sidebar{flex-basis:auto}}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div style="width:44px;height:44px;border-radius:10px;background:#073b56;display:flex;align-items:center;justify-content:center;font-weight:700">AR</div>
+      <div>
+        <div class="title">Amar Reports</div>
+        <div class="muted">Telegram-style scam report templates — ready to copy/download</div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Sidebar: report options -->
+      <aside class="sidebar">
+        <div class="top-row">
+          <input id="search" class="search" placeholder="Search report type…" oninput="renderList()" />
+          <button class="small btn-ghost" onclick="exportLogs()">Export Logs</button>
+        </div>
+
+        <div id="list">
+          <!-- list injected -->
+        </div>
+
+        <div style="margin-top:10px" class="muted">Quick actions</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="small" onclick="selectFirst()">First</button>
+          <button class="small btn-ghost" onclick="clearLogs()">Clear Logs</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Record count: <span id="logCount">0</span></div>
+          <div class="muted" style="margin-top:8px">Note: Reports stored locally (browser localStorage). Export to CSV for server import.</div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <section class="content">
+        <div class="report-box" id="detailArea">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="muted">Selected</div>
+              <h3 id="selTitle">— Select a report —</h3>
+            </div>
+            <div style="text-align:right">
+              <div class="muted">Total templates</div>
+              <div id="totalTemplates" style="font-weight:700">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px" id="templateArea">
+            <div class="muted">No report selected. Click any option from left to auto-generate a ready-to-use report.</div>
+          </div>
+
+          <div class="report-actions" style="margin-top:12px">
+            <button id="copyBtn" onclick="copyReport()" style="display:none">📋 Copy</button>
+            <button id="downloadBtn" onclick="downloadReport()" style="display:none" class="btn-ghost">⬇ Download .txt</button>
+            <button id="postBtn" onclick="shareToTelegram()" style="display:none" class="btn-ghost">↗ Share</button>
+          </div>
+        </div>
+
+        <!-- editable area for user additions -->
+        <div class="report-box">
+          <div class="muted">Edit / Add details (optional)</div>
+          <textarea id="userNotes" placeholder="Add any extra details (e.g., username, link, date, amount) — will be included in the report"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button onclick="saveDraft()">Save Draft (local)</button>
+            <button class="btn-ghost" onclick="loadDraft()">Load Draft</button>
+            <button class="btn-ghost" onclick="clearDraft()">Clear</button>
+          </div>
+        </div>
+
+        <!-- Ad slot (paste your ad network script here) -->
+        <div class="ad-slot" id="adSlot">
+          <!-- AD SLOT: Replace this comment with your Adsterra/Propeller/AdSense code -->
+          Ad slot — paste your ad network script here (Adsterra / Propeller / AdSense).
+        </div>
+
+        <div class="footer">
+          <div class="muted">Disclaimer: Generated templates are user-provided drafts intended for reporting/awareness. Verify before publishing. We store data locally only unless you export.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+/* ---------------------------
+  Templates data (editable)
+----------------------------*/
+const REPORT_TEMPLATES = [
+  { id:'scam', title:'Scam or fraud', text_hi:`🚨 SCAM ALERT 🚨
+
+समूह/यूज़र: [@username / link]
+प्रकार: संभावित निवेश/कमाई स्कीम (fraud)
+संभावित नुकसान: [₹/USD amount]
+प्रमाण: स्क्रीनशॉट संलग्न
+
+विवरण:
+- उपयोगकर्ता ने सूचित किया कि समूह/व्यक्ति निवेश/कमाने का झूठा दावा कर रहा है।
+- सलाह: किसी को भी पैसे न भेजें; आधिकारिक सत्यापन के बिना लेन-देन न करें।
+
+(यह रिपोर्ट उपयोगकर्ता द्वारा दी गई जानकारी पर आधारित है।)` ,
+      text_en:`🚨 SCAM ALERT 🚨
+
+Group/Account: [@username / link]
+Type: Potential investment/earnings scam
+Reported loss: [₹/USD amount]
+Evidence: screenshots attached
+
+Details:
+- User reports fraudulent claims of earnings/investment.
+- Advice: Do not transfer money. Verify independently before any transaction.
+
+(This report is based on user-provided information.)`
+  },
+
+  { id:'spam', title:'Spam / Promotional abuse', text_hi:`Report Type: Spam / Promotional messages
+
+समूह/यूज़र: [@username / link]
+विवरण: यह खाते/ग्रुप बार-बार promotional messages / ads भेजता है। उपयोगकर्ताओं को धोखा देने वाले लिंक/संदेश भेजे जाते हैं।
+अनुरोध: कृपया स्पैम नीतियों के अनुसार समीक्षा करें और आवश्यक कार्रवाई करें।` ,
+      text_en:`Report Type: Spam / Promotional abuse
+
+Group/Account: [@username / link]
+Details: Account/group repeatedly sends promotional posts or misleading ad links.
+Request: Please review under spam policies and take action as needed.`
+  },
+
+  { id:'impersonation', title:'Impersonation / Fake account', text_hi:`Report Type: Impersonation
+
+अकाउंट: [@username]
+विवरण: यह अकाउंट किसी वास्तविक व्यक्ति/ऑर्गनाइज़ेशन की नकल कर रहा है, और लोगों को ठगने के उद्देश्य से संपर्क कर रहा है।
+अनुरोध: कृपया अकाउंट की पहचान सत्यापित करें और आवश्यक कार्रवाई करें।` ,
+      text_en:`Report Type: Impersonation
+
+Account: [@username]
+Details: This account impersonates a real person/organization and may be used to defraud people.
+Request: Verify identity and take appropriate measures.`
+  },
+
+  { id:'personal', title:'Personal data / Privacy breach', text_hi:`Report Type: Personal data exposed
+
+विवरण: इस पोस्ट/संदेश में संवेदनशील व्यक्तिगत जानकारी (फोन, बैंक, पहचान) सार्वजनिक की गई है।
+प्रभाव: गोपनीयता उल्लंघन; जोखिम संभावित पहचान चोरी/financial loss।
+अनुरोध: कृपया सामग्री हटाएँ और उपयोगकर्ता को सचेत करें।` ,
+      text_en:`Report Type: Personal data exposed
+
+Details: Sensitive personal information (phone, bank, ID) is publicly exposed.
+Impact: Privacy breach; risk of identity theft/financial loss.
+Request: Remove the content and inform affected users.`
+  },
+
+  { id:'violence', title:'Violence / Hate', text_hi:`Report Type: Violence / Hate content
+
+विवरण: संदेश/पोस्ट हिंसा को भड़काता है या किसी समूह/व्यक्ति के खिलाफ घृणा फैला रहा है।
+अनुरोध: कृपया तत्काल समीक्षा कर के नियमों के अनुसार हटाएँ।` ,
+      text_en:`Report Type: Violence / Hate content
+
+Details: The message/post promotes violence or hate against a person/group.
+Request: Please review immediately and remove if policy-violating.`
+  },
+
+  { id:'copyright', title:'Copyright violation', text_hi:`Report Type: Copyright infringement
+
+विवरण: इस चैनल/यूज़र ने कॉपीराइटेड सामग्री बिना अनुमति साझा की है।
+अनुरोध: कृपया कंटेंट की जांच करें और अधिकारिक कॉपीराइट रिमेडीज़ लागू करें।` ,
+      text_en:`Report Type: Copyright infringement
+
+Details: The channel/user shared copyrighted material without permission.
+Request: Please inspect and apply appropriate takedown/remedy.`
+  },
+
+  { id:'other', title:'Other / Policy violation', text_hi:`Report Type: Other / Policy Violation
+
+विवरण: उपयोगकर्ता ने अन्य प्रकार की नीति-उल्लंघन वाली गतिविधि दर्ज की है (विवरण नीचे दें)।
+अनुरोध: कृपया मैन्युअल समीक्षा करें।` ,
+      text_en:`Report Type: Other / Policy Violation
+
+Details: User reports other policy-violating activity (please describe).
+Request: Manual review requested.`
+  }
+];
+
+/* ---------------------------
+  Render left list & initial
+----------------------------*/
+function renderList(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const list=document.getElementById('list'); list.innerHTML='';
+  REPORT_TEMPLATES.forEach(t=>{
+    if(q && !(t.title.toLowerCase().includes(q) || t.text_hi.toLowerCase().includes(q) || t.text_en.toLowerCase().includes(q))) return;
+    const div=document.createElement('div'); div.className='list-item';
+    div.innerHTML=`<div><strong>${t.title}</strong><div class="muted" style="font-size:13px">${t.id}</div></div><div class="muted small">→</div>`;
+    div.onclick=()=>selectTemplate(t.id);
+    list.appendChild(div);
+  });
+  document.getElementById('totalTemplates').innerText=REPORT_TEMPLATES.length;
+}
+renderList();
+
+/* ---------------------------
+  Selection & show template
+----------------------------*/
+let currentTemplate=null;
+function selectTemplate(id){
+  const tpl=REPORT_TEMPLATES.find(x=>x.id===id);
+  currentTemplate=tpl;
+  document.getElementById('selTitle').innerText=tpl.title;
+  showTemplate(tpl);
+}
+function showTemplate(tpl){
+  const area=document.getElementById('templateArea');
+  const notes = localStorage.getItem('draftNotes') || '';
+  area.innerHTML=`
+    <div style="text-align:left">
+      <div class="muted">Hindi / हिन्दी</div>
+      <pre style="white-space:pre-wrap;background:#071225;padding:10px;border-radius:8px;color:#e6eef6">${tpl.text_hi.replace(/\n/g,'\n')}</pre>
+      <div class="muted" style="margin-top:8px">English</div>
+      <pre style="white-space:pre-wrap;background:#071225;padding:10px;border-radius:8px;color:#e6eef6">${tpl.text_en.replace(/\n/g,'\n')}</pre>
+      <div style="margin-top:8px" class="muted">User notes (will be appended):</div>
+      <pre style="white-space:pre-wrap;background:#071225;padding:8px;border-radius:6px;color:#cfe9ff">${notes}</pre>
+    </div>
+  `;
+  showActions(true);
+}
+
+/* ---------------------------
+  Copy / Download / Share
+----------------------------*/
+function buildFinalText(){
+  if(!currentTemplate) return '';
+  const notes = document.getElementById('userNotes').value || localStorage.getItem('draftNotes') || '';
+  const out = `--- Amar Reports Template ---\n\n${currentTemplate.text_hi}\n\n----\nEnglish:\n\n${currentTemplate.text_en}\n\n----\nUser notes:\n${notes}\n\n(Generated by Amar Reports)`;
+  return out;
+}
+
+function copyReport(){
+  const txt=buildFinalText();
+  if(!txt) return alert('Select a report first');
+  navigator.clipboard.writeText(txt).then(()=>{ alert('Report copied to clipboard'); logAction(currentTemplate.id); });
+}
+
+function downloadReport(){
+  const txt=buildFinalText();
+  if(!txt) return alert('Select a report first');
+  const name = `${currentTemplate.id}-report.txt`;
+  const blob = new Blob([txt], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  logAction(currentTemplate.id);
+}
+
+function shareToTelegram(){
+  const txt=encodeURIComponent(buildFinalText());
+  // Opens Telegram share for mobile/desktop (user chooses)
+  const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${txt}`;
+  window.open(tgUrl,'_blank');
+  logAction(currentTemplate.id);
+}
+
+/* ---------------------------
+  Draft save/load
+----------------------------*/
+function saveDraft(){
+  const notes=document.getElementById('userNotes').value;
+  localStorage.setItem('draftNotes',notes);
+  alert('Draft saved locally');
+}
+function loadDraft(){
+  const notes=localStorage.getItem('draftNotes')||'';
+  document.getElementById('userNotes').value=notes;
+  alert('Draft loaded');
+}
+function clearDraft(){
+  localStorage.removeItem('draftNotes');
+  document.getElementById('userNotes').value='';
+  alert('Draft cleared');
+}
+
+/* ---------------------------
+  Local logging (records)
+----------------------------*/
+function logAction(templateId){
+  const logs = JSON.parse(localStorage.getItem('amar_reports_logs')||'[]');
+  logs.push({id:templateId, time:new Date().toISOString(), notes: (document.getElementById('userNotes').value||'')});
+  localStorage.setItem('amar_reports_logs', JSON.stringify(logs));
+  updateLogCount();
+}
+function updateLogCount(){
+  const logs=JSON.parse(localStorage.getItem('amar_reports_logs')||'[]');
+  document.getElementById('logCount').innerText = logs.length;
+}
+function exportLogs(){
+  const logs=JSON.parse(localStorage.getItem('amar_reports_logs')||'[]');
+  if(!logs.length) return alert('No logs to export');
+  // convert to CSV
+  const csv = ['template_id,time,notes', ...logs.map(l=>`${l.id},"${l.time}","${(l.notes||'').replace(/"/g,'""')}"`)].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='amar_reports_logs.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+function clearLogs(){
+  if(confirm('Clear all local logs?')){ localStorage.removeItem('amar_reports_logs'); updateLogCount(); alert('Logs cleared'); }
+}
+
+/* ---------------------------
+  helpers
+----------------------------*/
+function showActions(show){
+  document.getElementById('copyBtn').style.display = show ? 'inline-block' : 'none';
+  document.getElementById('downloadBtn').style.display = show ? 'inline-block' : 'none';
+  document.getElementById('postBtn').style.display = show ? 'inline-block' : 'none';
+}
+function selectFirst(){ if(REPORT_TEMPLATES[0]) selectTemplate(REPORT_TEMPLATES[0].id); }
+
+/* initialize */
+updateLogCount();
+selectFirst();
+
+/* AD NOTE: Replace the ad-slot innerHTML with your ad network snippet after approval.
+   Example (Adsterra) might look like: 
+   document.getElementById('adSlot').innerHTML = '<script src="...adsterra..."></script>';
+*/
+</script>
+</body>
+</html>
